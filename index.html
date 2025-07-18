@@ -1,0 +1,103 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Ashley – The Routing Boss</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background-color: #121212;
+      color: #f1f1f1;
+    }
+    .chat-container {
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+      max-width: 600px;
+      margin: auto;
+      padding: 1rem;
+    }
+    .chat-box {
+      flex: 1;
+      overflow-y: auto;
+      border: 1px solid #444;
+      border-radius: 8px;
+      padding: 1rem;
+      background: #1e1e1e;
+      margin-bottom: 1rem;
+    }
+    .input-box {
+      display: flex;
+    }
+    .input-box input {
+      flex: 1;
+      padding: 0.75rem;
+      font-size: 1rem;
+      border-radius: 4px;
+      border: 1px solid #555;
+      background-color: #222;
+      color: #fff;
+    }
+    .input-box button {
+      padding: 0.75rem;
+      font-size: 1rem;
+      margin-left: 0.5rem;
+      border: none;
+      border-radius: 4px;
+      background-color: #1e3a8a;
+      color: white;
+      cursor: pointer;
+    }
+    .msg { margin: 0.5rem 0; }
+    .user { text-align: right; }
+    .bot { text-align: left; }
+  </style>
+</head>
+<body>
+  <div class="chat-container">
+    <div class="chat-box" id="chat"></div>
+    <div class="input-box">
+      <input type="text" id="userInput" placeholder="Talk to Ashley..." />
+      <button onclick="sendMessage()">Send</button>
+    </div>
+  </div>
+
+  <script>
+    const chat = document.getElementById('chat');
+    const input = document.getElementById('userInput');
+
+    function addMessage(msg, type) {
+      const div = document.createElement('div');
+      div.className = `msg ${type}`;
+      div.textContent = msg;
+      chat.appendChild(div);
+      chat.scrollTop = chat.scrollHeight;
+    }
+
+    async function sendMessage() {
+      const text = input.value.trim();
+      if (!text) return;
+      addMessage(text, 'user');
+      input.value = '';
+      try {
+        const res = await fetch('/api/chat', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ message: text })
+        });
+        const data = await res.json();
+        if (data.response) {
+          addMessage(data.response, 'bot');
+        } else {
+          addMessage("Something went wrong talking to Ashley.", 'bot');
+        }
+      } catch (err) {
+        addMessage("Error: " + err.message, 'bot');
+      }
+    }
+  </script>
+</body>
+</html>
